@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import telran.exeptions.NotFoundExeption;
+import telran.exceptions.NotFoundException;
 import telran.students.dto.Mark;
 import telran.students.dto.Student;
 import telran.students.model.StudentDoc;
@@ -42,7 +42,7 @@ public class StudentsServiceImpl implements StudentsService {
 
 	private StudentDoc getStudent(long id) {
 		return studentRepo.findById(id)
-				.orElseThrow(() -> new NotFoundExeption(String.format("Student %d not found", id)));
+				.orElseThrow(() -> new NotFoundException(String.format("Student %d not found", id)));
 	}
 
 	@Override
@@ -60,7 +60,7 @@ public class StudentsServiceImpl implements StudentsService {
 	public Student removeStudent(long id) {
 		StudentDoc studentDoc = studentRepo.findStudentNoMarks(id);
 		if(studentDoc == null) {
-			throw new NotFoundExeption(String.format("student %d not found", id));
+			throw new NotFoundException(String.format("student %d not found", id));
 		}
 		studentRepo.deleteById(id);
 		log.debug("removed student {}, marks {} ", id, studentDoc.getMarks());
@@ -72,7 +72,7 @@ public class StudentsServiceImpl implements StudentsService {
 	public List<Mark> getMarks(long id) {
 		StudentDoc studentDoc = studentRepo.findStudentMarks(id);
 		if(studentDoc == null) {
-			throw new NotFoundExeption(String.format("student %d not found", id));
+			throw new NotFoundException(String.format("student %d not found", id));
 		}
 		log.debug("id {}, name {}, phone {}, marks {}", 
 				studentDoc.getId(), studentDoc.getName(), studentDoc.getPhone(), studentDoc.getMarks());

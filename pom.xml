@@ -54,7 +54,7 @@
 		</dependency>
 		<dependency>
 			<groupId>telran.spring</groupId>
-			<artifactId>web-exeptions-handler</artifactId>
+			<artifactId>web-exceptions-handler</artifactId>
 			<version>0.0.1</version>
 		</dependency>
 		

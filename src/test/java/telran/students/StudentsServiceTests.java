@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import telran.exeptions.NotFoundExeption;
+import telran.exceptions.NotFoundException;
 import telran.students.dto.Mark;
 import telran.students.dto.Student;
 import telran.students.service.StudentsService;
@@ -37,7 +37,7 @@ class StudentsServiceTests {
 	@Test
 	@DisplayName("Testing method getMarks, NotFoundException")
 	void getMarksNotFoundTest() {
-		assertThrowsExactly(NotFoundExeption.class, 
+		assertThrowsExactly(NotFoundException.class, 
 				() -> studentsService.getMarks(10));
 	}
 	
@@ -69,7 +69,7 @@ class StudentsServiceTests {
 	@Test
 	@DisplayName("Testing method updatePhone,  NotFoundExeption flow")
 	void updatePhoneNotFoundStudentTest() {
-		assertThrowsExactly(NotFoundExeption.class, 
+		assertThrowsExactly(NotFoundException.class, 
 				() -> studentsService.updatePhone(10l, dbCreation.PHONE_UPDATED));
 	}
 	
@@ -85,7 +85,7 @@ class StudentsServiceTests {
 	@Test
 	@DisplayName("Testing method addMark, NotFoundException flow")
 	void addMarkStudentNotFoundTest() {
-		assertThrowsExactly(NotFoundExeption.class, 
+		assertThrowsExactly(NotFoundException.class, 
 				() -> studentsService.addMark(10l, dbCreation.addedMark));
 	}
 	
@@ -102,7 +102,7 @@ class StudentsServiceTests {
 	@Test
 	@DisplayName("Testing method removeStudent, NotFoundException flow")
 	void removeStudentNofoundTest() {
-		assertThrowsExactly(NotFoundExeption.class, 
+		assertThrowsExactly(NotFoundException.class, 
 				() -> studentsService.removeStudent(10l));
 	}
 
