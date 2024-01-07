@@ -2,11 +2,10 @@ package telran.students;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
-import java.util.stream.IntStream;
+import java.time.LocalDate;
+import java.util.*;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,96 +13,61 @@ import org.springframework.boot.test.context.SpringBootTest;
 import telran.exceptions.NotFoundException;
 import telran.students.dto.Mark;
 import telran.students.dto.Student;
+import telran.students.repo.StudentRepo;
 import telran.students.service.StudentsService;
-
 @SpringBootTest
 class StudentsServiceTests {
-	@Autowired 
-	StudentsService studentsService;
+	@Autowired
+StudentsService studentsService;
 	@Autowired
 	DbTestCreation dbCreation;
-	@BeforeEach 
+	@Autowired
+StudentRepo studentRepo;	
+	@BeforeEach
 	void setUp() {
-		dbCreation.createDb();
+		dbCreation.createDB();
 	}
-	
 	@Test
-	@DisplayName("Testing method getMarks, normal flow")
 	void getMarksTest() {
 		Mark[] marksActual = studentsService.getMarks(1).toArray(Mark[]::new);
 		Mark[] marksExpected = dbCreation.getStudentMarks(1);
 		assertArrayEquals(marksExpected, marksActual);
+		assertThrowsExactly(NotFoundException.class, () -> studentsService.getMarks(10000000));
 	}
 	@Test
-	@DisplayName("Testing method getMarks, NotFoundException")
-	void getMarksNotFoundTest() {
-		assertThrowsExactly(NotFoundException.class, 
-				() -> studentsService.getMarks(10));
-	}
-	
-	@Test
-	@DisplayName("Testing method addStudent, normal flow")
-	void addStudentTest() {
-		Student addedStudentActual = studentsService.addStudent(dbCreation.addedStudent);
-		assertEquals(8, dbCreation.getAllStudents().size());
-		Student addedStudentExpected = dbCreation.addedStudent;
-		assertTrue(addedStudentExpected.equals(addedStudentActual));
-	}
-	@Test
-	@DisplayName("Testing method addStudent, IllegalStateException, student already exists")
-	void addExistStudentTest() {
-		Student studentExist = dbCreation.students[0]; 
-		assertThrowsExactly(IllegalStateException.class, 
-				() -> studentsService.addStudent(studentExist));
-	}
-	
-	@Test
-	@DisplayName("Testing method updatePhone, normal flow")
-	void updatePhoneTest() {
-		Student studentUpdatedPhoneActual = studentsService.updatePhone(1l, dbCreation.PHONE_UPDATED);
-		Student studentUpdatedPhoneExpected = dbCreation.studentUdatedPhone;
-		assertTrue(studentUpdatedPhoneExpected.equals(studentUpdatedPhoneActual));
-		assertTrue(studentUpdatedPhoneExpected
-					.equals(dbCreation.getStudentUpdatedPhone(1l)));
-	}
-	@Test
-	@DisplayName("Testing method updatePhone,  NotFoundExeption flow")
-	void updatePhoneNotFoundStudentTest() {
-		assertThrowsExactly(NotFoundException.class, 
-				() -> studentsService.updatePhone(10l, dbCreation.PHONE_UPDATED));
-	}
-	
-	@Test
-	@DisplayName("Testing method addMark, normal flow")
-	void addMarkTest() {
-		List<Mark> marksActual = studentsService.addMark(7l, dbCreation.addedMark);
-		List<Mark> marksExpected = dbCreation.marksWithAdded(7l, dbCreation.addedMark);
-		assertTrue(marksExpected.equals(marksActual));
-		List<Mark> addedMarks = dbCreation.getStudentMarksActual(7l);
-		assertTrue(marksExpected.equals(addedMarks));
-	}
-	@Test
-	@DisplayName("Testing method addMark, NotFoundException flow")
-	void addMarkStudentNotFoundTest() {
-		assertThrowsExactly(NotFoundException.class, 
-				() -> studentsService.addMark(10l, dbCreation.addedMark));
-	}
-	
-	@Test
-	@DisplayName("Testing method removeStudent, normal flow")
 	void removeStudentTest() {
-		Student studentRemovedActual = studentsService.removeStudent(dbCreation.ID_1);
-		Student studentRemovedExpected = dbCreation.studentRemoving;
-		assertEquals(studentRemovedExpected, studentRemovedActual);
-		List<Student> allStudentsActual = dbCreation.getAllStudents();
-		assertEquals(6, allStudentsActual.size());
-		
+		assertEquals(dbCreation.getStudent(1), studentsService.removeStudent(1));
+		assertThrowsExactly(NotFoundException.class, ()->studentsService.removeStudent(1));
 	}
 	@Test
-	@DisplayName("Testing method removeStudent, NotFoundException flow")
-	void removeStudentNofoundTest() {
-		assertThrowsExactly(NotFoundException.class, 
-				() -> studentsService.removeStudent(10l));
+	void addMarkTest() {
+		List<Mark> marksStudent2Expected = new ArrayList<>(Arrays.asList(dbCreation.getStudentMarks(2)));
+		Mark mark = new Mark("Java", LocalDate.now(), 100);
+		marksStudent2Expected.add(mark);
+		assertIterableEquals(marksStudent2Expected, studentsService.addMark(2, mark));
+		assertIterableEquals(marksStudent2Expected, studentsService.getMarks(2));
+		assertThrowsExactly(NotFoundException.class, () -> studentsService.addMark(0, mark));
+	}
+
+	@Test
+	void updatePhoneTest() {
+		Student student1 = dbCreation.getStudent(3);
+		String newPhone = "055-5555555";
+		Student expected = new Student(student1.id(), student1.name(), newPhone);
+		assertEquals(expected, studentsService.updatePhone(3, newPhone));
+		Student actual = studentRepo.findById(3l).orElseThrow().build();
+		assertEquals(expected, actual);
+		assertThrowsExactly(NotFoundException.class, () -> studentsService.updatePhone(0, newPhone));
+	}
+	@Test
+	void addStudentTest() {
+		Student studentExisting = dbCreation.getStudent(4);
+		Student newStudent = new Student(-1l, "Vasya", "111111111");
+		assertEquals(newStudent, studentsService.addStudent(newStudent));
+		Student actual = studentRepo.findById(-1l).orElseThrow().build();
+		assertEquals(newStudent, actual);
+		assertThrowsExactly(IllegalStateException.class,
+				()-> studentsService.addStudent(studentExisting));
 	}
 
 
