@@ -11,5 +11,8 @@ public interface StudentsService {
 	List<Mark> addMark(long id, Mark mark);
 	Student removeStudent(long id);
 	List<Mark> getMarks(long id); 
-
+	Student getStudentByPhone(String phoneNumber);
+	List<Student> getStudentsByPhonePrefix(String phonePrefix);
+	List<Student> getStudentsAllGoodMarks(int thresholdScore);
+	List<Student> getStudentsFewMarks(int thresholdMarks);
 }

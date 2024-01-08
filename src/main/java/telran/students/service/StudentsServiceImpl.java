@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import telran.exceptions.NotFoundException;
+import telran.students.dto.IdName;
+import telran.students.dto.IdNamePhone;
 import telran.students.dto.Mark;
 import telran.students.dto.Student;
 import telran.students.model.StudentDoc;
@@ -77,6 +79,40 @@ public class StudentsServiceImpl implements StudentsService {
 		log.debug("id {}, name {}, phone {}, marks {}", 
 				studentDoc.getId(), studentDoc.getName(), studentDoc.getPhone(), studentDoc.getMarks());
 		return studentDoc.getMarks();
+	}
+
+	@Override
+	public Student getStudentByPhone(String phoneNumber) {
+		IdName studentDoc = studentRepo.findByPhone(phoneNumber);
+		Student res = null;
+		if(studentDoc != null) {
+			res = new Student(studentDoc.getId(), studentDoc.getName(), phoneNumber);
+		}
+		return res;
+	}
+
+	@Override
+	public List<Student> getStudentsByPhonePrefix(String phonePrefix) {
+		List <IdNamePhone> students = studentRepo.findByPhoneRegex(phonePrefix + ".+");
+		log.debug("number of the students having phone prefix {} is ", phonePrefix, students.size());
+		return getStudents(students);
+	}
+
+	private List<Student> getStudents(List<IdNamePhone> students) {
+		return students.stream().map(inp -> new Student(inp.getId(), inp.getName (), 
+				inp.getPhone())).toList();
+	}
+
+	@Override
+	public List<Student> getStudentsAllGoodMarks(int thresholdScore) {
+		List<IdNamePhone> students = studentRepo.findByGoodMarks(thresholdScore);
+		return getStudents(students);
+	}
+
+	@Override
+	public List<Student> getStudentsFewMarks(int thresholdMarks) {
+		List<IdNamePhone> students = studentRepo.findByFewMarks(thresholdMarks);
+		return getStudents(students);	
 	}
 
 }
