@@ -113,6 +113,21 @@ public class StudentsServiceImpl implements StudentsService {
 	public List<Student> getStudentsFewMarks(int thresholdMarks) {
 		List<IdNamePhone> students = studentRepo.findByFewMarks(thresholdMarks);
 		return getStudents(students);	
+		}
+
+	@Override
+	public List<Student> getStudentsAllGoodMarksSubject(String subject, int thresholdScore) {
+		List<IdNamePhone> students = studentRepo.findByGoodMarksSubject(subject, thresholdScore);
+		List<Student> res = getStudents(students);
+		log.debug("Service method  getStudentsAllGoodMarksSubject OUT: {}", res );
+		return res;
+	}
+
+	
+	@Override
+	public List<Student> getStudentsMarksAmountBetween(int min, int max) {
+		List<IdNamePhone> students = studentRepo.findByAmountMarksBetween(min, max);
+		return getStudents(students);
 	}
 
 }

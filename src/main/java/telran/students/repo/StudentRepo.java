@@ -19,11 +19,20 @@ public interface StudentRepo extends MongoRepository<StudentDoc, Long> {
 	/****************************************/
 	List<IdNamePhone> findByPhoneRegex(String string);
 	/**********************************************************/
-	@Query(value = "{$and:[{marks:{$elemMatch: {score: {$gt:?0 } } } }, "
+	@Query(value = "{$and:[ {marks:{$elemMatch: {score: {$gt:?0 } } } }, "
 			+ "{marks: {$not:{$elemMatch: {score: {$lte:?0 } } } } }]}")
 	List<IdNamePhone> findByGoodMarks(int thresholdScore);
 	/****************************************/
 	@Query(value = "{$expr:{ $lt:[{$size:$marks}, ?0] } }")
 	List<IdNamePhone> findByFewMarks(int thresholdMarks);
+	/*****************************************/
+	@Query(value = "{$and:[{marks: {$elemMatch:{subject:?0}}},  "
+			+ "{marks:{$elemMatch: {score: {$gt:?1 } } } }, "
+			+ "{marks: {$not:{$elemMatch: {score: {$lte:?1 } } } } }]}")
+	List<IdNamePhone> findByGoodMarksSubject(String subject, int thresholdScore);
+	/**************************************************************************/
+	@Query(value =  "{$and: [ {$expr: {$gte: [ {$size:$marks}, ?0] }}, "
+			+ "{$expr: {$lte:[{$size:$marks}, ?1] }}]} ")
+	List<IdNamePhone> findByAmountMarksBetween(int min, int max);
 }
 	
