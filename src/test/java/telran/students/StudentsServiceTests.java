@@ -136,5 +136,17 @@ class StudentsServiceTests {
 		assertIterableEquals(expected, actual);
 		assertTrue(studentsService.getStudentsMarksAmountBetween(5, 10).isEmpty());
 	}
+	
+	@Test
+	void getStudenSubjectMarks() {
+		List<Mark> expected = List.of(new Mark(DbTestCreation.SUBJECT_1, DbTestCreation.DATE_1, 80), 
+				new Mark(DbTestCreation.SUBJECT_1, DbTestCreation.DATE_2, 90));
+		List<Mark> actual = studentsService.getStudentSubjectMarks(1, DbTestCreation.SUBJECT_1);
+		assertTrue(studentsService.getStudentSubjectMarks(4, DbTestCreation.SUBJECT_1).isEmpty());
+		assertThrowsExactly(NotFoundException.class, 
+				() -> studentsService.getStudentSubjectMarks(1000, DbTestCreation.SUBJECT_1));		
+		assertIterableEquals(expected, actual);		
+				
+	}
 
 }
