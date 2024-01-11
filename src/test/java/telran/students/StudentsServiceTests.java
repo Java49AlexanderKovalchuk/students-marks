@@ -114,26 +114,27 @@ class StudentsServiceTests {
 		assertIterableEquals(expected, actual);
 		assertTrue(studentsService.getStudentsFewMarks(0).isEmpty());
 	}
-	/**********HW #74**************/
+	/**********HW #74*************2456*/
 	@Test
 	@DisplayName("Testing Service method: getStudentsAllGoodMarksSubject")
 	void getStudentsAllGoodMarksSubject() {
-		List<Student> expected = List.of(dbCreation.getStudent(4), dbCreation.getStudent(6));
+		List<Student> expected = List.of(dbCreation.getStudent(6));
 		List<Student> actual = 
-				studentsService.getStudentsAllGoodMarksSubject(DbTestCreation.SUBJECT_3, 70);
+				studentsService.getStudentsAllGoodMarksSubject(DbTestCreation.SUBJECT_1, 90);
+		assertEquals(1, actual.size());
 		assertIterableEquals(expected, actual);
-		assertTrue(studentsService
-				.getStudentsAllGoodMarksSubject(DbTestCreation.SUBJECT_1, 100).isEmpty());
+		assertTrue(studentsService.getStudentsAllGoodMarksSubject(DbTestCreation.SUBJECT_2, 150)
+				.isEmpty());
 	}
 	@Test
 	@DisplayName("Testing Service method: getStudentsMarksAmountBetween")
 	void getStudentsMarksAmountBetweenTest() {
-		List<Student> expected = List.of(dbCreation.getStudent(2), dbCreation.getStudent(3), 
-				dbCreation.getStudent(5)); 
+		List<Student> expected = List.of(dbCreation.getStudent(3), dbCreation.getStudent(5)); 
 		List<Student> actual = 
-				studentsService.getStudentsMarksAmountBetween(1, 2);
-		assertTrue(actual.size() == 3);
+				studentsService.getStudentsMarksAmountBetween(2, 2);
+		
 		assertIterableEquals(expected, actual);
+		assertTrue(studentsService.getStudentsMarksAmountBetween(5, 10).isEmpty());
 	}
 
 }
