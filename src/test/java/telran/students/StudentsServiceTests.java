@@ -15,6 +15,7 @@ import org.springframework.data.mongodb.MongoTransactionManager;
 
 import telran.exceptions.NotFoundException;
 import telran.students.dto.Mark;
+import telran.students.dto.NameAvgScore;
 import telran.students.dto.Student;
 import telran.students.repo.StudentRepo;
 import telran.students.service.StudentsService;
@@ -147,6 +148,13 @@ class StudentsServiceTests {
 				() -> studentsService.getStudentSubjectMarks(1000, DbTestCreation.SUBJECT_1));		
 		assertIterableEquals(expected, actual);		
 				
+	}
+	@Test
+	void getStudentAvgScoreGreater() {
+		List<NameAvgScore> expected = List.of(new NameAvgScore(DbTestCreation.NAME_6, 100), 
+				new NameAvgScore(DbTestCreation.NAME_4, 93));
+		List<NameAvgScore> actual = studentsService.getStudentAvgScoreGreater(90);
+		assertIterableEquals(expected, actual);
 	}
 
 }

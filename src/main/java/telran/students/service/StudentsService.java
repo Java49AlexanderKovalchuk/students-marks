@@ -26,5 +26,5 @@ public interface StudentsService {
 	List<Student> getStudentsMarksAmountBetween(int min, int max);
 	//CW#75
 	List<Mark> getStudentSubjectMarks(long id, String subject);
-	
+	List<NameAvgScore> getStudentAvgScoreGreater(int avgScoreThreshold);
 }
