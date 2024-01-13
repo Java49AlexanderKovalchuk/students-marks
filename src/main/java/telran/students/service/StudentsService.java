@@ -1,5 +1,6 @@
 package telran.students.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import telran.students.dto.*;
@@ -27,4 +28,8 @@ public interface StudentsService {
 	//CW#75
 	List<Mark> getStudentSubjectMarks(long id, String subject);
 	List<NameAvgScore> getStudentAvgScoreGreater(int avgScoreThreshold);
+	//HW #75
+	List<Mark> getStudentMarksAtDates(long id, LocalDate from, LocalDate to);
+	List<String> getBestStudents(int nStudents);
+	List<String> getWorstStudents(int nStudents);
 }

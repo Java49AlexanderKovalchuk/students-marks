@@ -115,7 +115,7 @@ class StudentsServiceTests {
 		assertIterableEquals(expected, actual);
 		assertTrue(studentsService.getStudentsFewMarks(0).isEmpty());
 	}
-	/**********HW #74*************2456*/
+	
 	@Test
 	@DisplayName("Testing Service method: getStudentsAllGoodMarksSubject")
 	void getStudentsAllGoodMarksSubject() {
@@ -155,6 +155,33 @@ class StudentsServiceTests {
 				new NameAvgScore(DbTestCreation.NAME_4, 93));
 		List<NameAvgScore> actual = studentsService.getStudentAvgScoreGreater(90);
 		assertIterableEquals(expected, actual);
+	}
+	
+	/*********************HW #75**********************/
+	
+	@Test
+	void getStudentMarksAtDatesTest() {
+		List<Mark> expected = List.of(new Mark(DbTestCreation.SUBJECT_1, DbTestCreation.DATE_1, 100), 
+				new Mark(DbTestCreation.SUBJECT_2, DbTestCreation.DATE_2, 100));
+		List<Mark> actual = studentsService.getStudentMarksAtDates(6, DbTestCreation.DATE_1, 
+				DbTestCreation.DATE_2);
+		assertTrue(actual.size() == 2);
+		assertIterableEquals(expected, actual);
+		assertThrowsExactly(NotFoundException.class, 
+				() -> studentsService.getStudentMarksAtDates(100, DbTestCreation.DATE_1, DbTestCreation.DATE_3));
+	}
+	
+	@Test
+	void getBestStudentsTest() {
+		List<String> expected = List.of(DbTestCreation.NAME_6, DbTestCreation.NAME_4);
+		List<String> actual = studentsService.getBestStudents(2);
+		assertTrue(actual.size() == 2);
+		assertIterableEquals(expected, actual);
+	
+	}
+	@Test
+	void getWorstStudentsTest() {
+		//TODO
 	}
 
 }

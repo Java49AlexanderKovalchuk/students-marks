@@ -1,5 +1,6 @@
 package telran.students.service;
 
+import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,7 @@ import telran.students.repo.StudentRepo;
 @Slf4j
 @RequiredArgsConstructor
 public class StudentsServiceImpl implements StudentsService {
+	private static final Object SCORE_THRESHOLD = 80;
 	final StudentRepo studentRepo;
 	final MongoTemplate mongoTemplate; 
 	@Override
@@ -178,5 +180,64 @@ public class StudentsServiceImpl implements StudentsService {
 		log.debug("result: {}", res);
 		return res;
 	}
+/********************************HW #75*********************************************/
+	@Override
+	public List<Mark> getStudentMarksAtDates(long id, LocalDate from, LocalDate to) {
+		if(!studentRepo.existsById(id)) {
+			throw new NotFoundException(String.format("student with id %d is not found", id));
+		}
+		MatchOperation matchStudent = Aggregation.match(Criteria.where("id").is(id));
+		UnwindOperation unwindOperation = Aggregation.unwind("marks");
+		MatchOperation matchMarksDate = Aggregation.match(Criteria.where("marks.date").gte(from)
+				.lte(to));
+		ProjectionOperation projectionOperation = Aggregation.project("marks.subject",
+				"marks.date", "marks.score");
+		Aggregation pipeLine = Aggregation.newAggregation(matchStudent, unwindOperation, 
+				matchMarksDate, projectionOperation);
+		var aggregationResult = mongoTemplate.aggregate(pipeLine, StudentDoc.class, Document.class);
+		List<Document> listDocuments = aggregationResult.getMappedResults();
+		log.debug("listDocuments: {}", listDocuments);
+		List<Mark> res = listDocuments.stream().map(d -> new Mark(d.getString("subject"), 
+				d.getDate("date").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), 
+				d.getInteger("score"))).toList();
+		log.debug("result: {}", res);
+		return res;
+	}
+
+	@Override
+	public List<String> getBestStudents(int nStudents) {
+		// TODO 
+		//returns list of a given number of the best students
+		//Best students are the ones who have most scores greater than 80
+		UnwindOperation  unwindOperation = Aggregation.unwind("marks");
+		MatchOperation matchBestMarks = Aggregation.match(Criteria.where("marks.score").gt(SCORE_THRESHOLD));
+		GroupOperation groupOperation = Aggregation.group("name").count().as("nBestMarks");
+		SortOperation sortOperation = Aggregation.sort(Direction.DESC, "nBestMarks");
+		ProjectionOperation projectionOperation = Aggregation.project("name");
+		LimitOperation limitNStudents = Aggregation.limit(nStudents);
+		Aggregation pipeLine = Aggregation.newAggregation(unwindOperation, matchBestMarks, groupOperation, 
+				sortOperation, projectionOperation, limitNStudents);
+		var aggregetionResult = mongoTemplate.aggregate(pipeLine, StudentDoc.class, Document.class);
+		List<Document> listDocuments = aggregetionResult.getMappedResults();
+		log.debug("list Documents: {}", listDocuments);
+		List<String> result = listDocuments.stream().map(d -> d.getString("_id")).toList();
+		log.debug("result: {}", result);
+		return result;
+	}
+
+	@Override
+	public List<String> getWorstStudents(int nStudents) {
+		// TODO 
+		//returns list of a given number of the worst students
+		//Worst students are the ones who have least sum's of all scores
+		//Students who have no scores at all should be considered as worst
+		//instead of GroupOperation to apply AggregationExpression (with AccumulatorOperators.Sum) and ProjectionOperation for adding new fields with computed values 
+		//UnwindOperation unwindOperation = Aggregation.unwind("marks");
+		//AggregationExpression aggregationExpression = AccumulatorOperators.Sum
+		
+		return null;
+	}
+
+	
 
 }
