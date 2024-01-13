@@ -181,7 +181,9 @@ class StudentsServiceTests {
 	}
 	@Test
 	void getWorstStudentsTest() {
-		studentsService.getWorstStudents(2);
+		List<String> expected = List.of(DbTestCreation.NAME_7, DbTestCreation.NAME_2);
+		List<String> actual = studentsService.getWorstStudents(2);
+		assertIterableEquals(expected, actual);
 	}
 
 }
