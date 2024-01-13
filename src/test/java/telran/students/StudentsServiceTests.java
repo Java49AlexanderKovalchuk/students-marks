@@ -181,7 +181,7 @@ class StudentsServiceTests {
 	}
 	@Test
 	void getWorstStudentsTest() {
-		//TODO
+		studentsService.getWorstStudents(2);
 	}
 
 }

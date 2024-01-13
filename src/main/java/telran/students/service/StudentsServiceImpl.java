@@ -232,10 +232,23 @@ public class StudentsServiceImpl implements StudentsService {
 		//Worst students are the ones who have least sum's of all scores
 		//Students who have no scores at all should be considered as worst
 		//instead of GroupOperation to apply AggregationExpression (with AccumulatorOperators.Sum) and ProjectionOperation for adding new fields with computed values 
-		//UnwindOperation unwindOperation = Aggregation.unwind("marks");
-		//AggregationExpression aggregationExpression = AccumulatorOperators.Sum
+		//AggregationExpression homeworkExpression = AccumulatorOperators.Sum.sumOf("homework");
+		AggregationExpression scoreExpression = AccumulatorOperators.Sum.sumOf("marks.score");
+		ProjectionOperation projectionOperation = Aggregation.project("name")
+				.and(scoreExpression).as("sumScores");
+		SortOperation sortOperation = Aggregation.sort(Direction.ASC, "sumScores");
+		LimitOperation limitOperation = Aggregation.limit(nStudents);
+		ProjectionOperation projectFinal = Aggregation.project("name");
+
+		Aggregation pipeLine = Aggregation.newAggregation(projectionOperation, sortOperation, 
+				limitOperation, projectFinal);
+		var aggregationResult = mongoTemplate.aggregate(pipeLine, StudentDoc.class, Document.class);
+		List<Document> listDocuments = aggregationResult.getMappedResults();
+		log.debug("list documents: {}",  listDocuments);
+		List<String> result = listDocuments.stream().map(d -> d.getString("name")).toList();
+		log.debug("result: {}", result);
+		return result;
 		
-		return null;
 	}
 
 	
