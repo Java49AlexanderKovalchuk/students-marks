@@ -147,19 +147,18 @@ public class StudentsServiceImpl implements StudentsService {
 		
 		MatchOperation matchMarksSubject = Aggregation.match(Criteria.where("marks.subject").is(subject));
 		
-		return getStudentMarksBySmthMatch(id, matchMarksSubject);
+		return getStudentMarksByMatchOperation(id, matchMarksSubject);
 	}
 	
-	private List<Mark> getStudentMarksBySmthMatch(long id, MatchOperation matchOperationSmth) {
+	private List<Mark> getStudentMarksByMatchOperation(long id, MatchOperation matchOperation) {
 		if(!studentRepo.existsById(id)) {
 			throw new NotFoundException(String.format("student with id %d not found", id));
 		}
 		MatchOperation matchStudent = Aggregation.match(Criteria.where("id").is(id));
 		UnwindOperation unwindOperation = Aggregation.unwind("marks");
-		//MatchOperation matchMarksSubject = Aggregation.match(Criteria.where("marks.subject").is(subject));
 		ProjectionOperation projectionOperation = Aggregation.project("marks.subject", "marks.score", "marks.date");
 		Aggregation pipeLine = Aggregation.newAggregation(matchStudent, unwindOperation, 
-				matchOperationSmth, projectionOperation);
+				matchOperation, projectionOperation);
 		var aggregationResult = mongoTemplate.aggregate(pipeLine, StudentDoc.class, Document.class);
 		List<Document> listDocuments = aggregationResult.getMappedResults();
 		log.debug("listDocuments: {}", listDocuments);
@@ -195,7 +194,7 @@ public class StudentsServiceImpl implements StudentsService {
 		MatchOperation matchMarksDate = Aggregation.match(Criteria.where("marks.date").gte(from)
 				.lte(to));
 		
-		return getStudentMarksBySmthMatch(id, matchMarksDate);
+		return getStudentMarksByMatchOperation(id, matchMarksDate);
 	}
 
 	@Override
