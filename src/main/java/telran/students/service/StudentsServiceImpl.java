@@ -144,27 +144,35 @@ public class StudentsServiceImpl implements StudentsService {
 
 	@Override
 	public List<Mark> getStudentSubjectMarks(long id, String subject) {
+		
+		MatchOperation matchMarksSubject = Aggregation.match(Criteria.where("marks.subject").is(subject));
+		
+		return getStudentMarksBySmthMatch(id, matchMarksSubject);
+	}
+	
+	private List<Mark> getStudentMarksBySmthMatch(long id, MatchOperation matchOperationSmth) {
 		if(!studentRepo.existsById(id)) {
 			throw new NotFoundException(String.format("student with id %d not found", id));
 		}
 		MatchOperation matchStudent = Aggregation.match(Criteria.where("id").is(id));
 		UnwindOperation unwindOperation = Aggregation.unwind("marks");
-		MatchOperation matchMarksSubject = Aggregation.match(Criteria.where("marks.subject").is(subject));
-		ProjectionOperation projectionOperation = Aggregation.project("marks.score", "marks.date");
+		//MatchOperation matchMarksSubject = Aggregation.match(Criteria.where("marks.subject").is(subject));
+		ProjectionOperation projectionOperation = Aggregation.project("marks.subject", "marks.score", "marks.date");
 		Aggregation pipeLine = Aggregation.newAggregation(matchStudent, unwindOperation, 
-				matchMarksSubject, projectionOperation);
+				matchOperationSmth, projectionOperation);
 		var aggregationResult = mongoTemplate.aggregate(pipeLine, StudentDoc.class, Document.class);
 		List<Document> listDocuments = aggregationResult.getMappedResults();
 		log.debug("listDocuments: {}", listDocuments);
 		List<Mark> result = listDocuments.stream()
-				.map(d -> new Mark(subject, 
+				.map(d -> new Mark(d.getString("subject"), 
 						d.getDate("date").toInstant().atZone(ZoneId.systemDefault())
 						.toLocalDate(), d.getInteger("score")))
 				.toList();
 		log.debug("result: {}", result);		
 		return result;
 	}
-
+	
+	
 	@Override
 	public List<NameAvgScore> getStudentAvgScoreGreater(int avgScoreThreshold) {
 		UnwindOperation unwindOperation = Aggregation.unwind("marks");
@@ -183,25 +191,11 @@ public class StudentsServiceImpl implements StudentsService {
 /********************************HW #75*********************************************/
 	@Override
 	public List<Mark> getStudentMarksAtDates(long id, LocalDate from, LocalDate to) {
-		if(!studentRepo.existsById(id)) {
-			throw new NotFoundException(String.format("student with id %d is not found", id));
-		}
-		MatchOperation matchStudent = Aggregation.match(Criteria.where("id").is(id));
-		UnwindOperation unwindOperation = Aggregation.unwind("marks");
+		
 		MatchOperation matchMarksDate = Aggregation.match(Criteria.where("marks.date").gte(from)
 				.lte(to));
-		ProjectionOperation projectionOperation = Aggregation.project("marks.subject",
-				"marks.date", "marks.score");
-		Aggregation pipeLine = Aggregation.newAggregation(matchStudent, unwindOperation, 
-				matchMarksDate, projectionOperation);
-		var aggregationResult = mongoTemplate.aggregate(pipeLine, StudentDoc.class, Document.class);
-		List<Document> listDocuments = aggregationResult.getMappedResults();
-		log.debug("listDocuments: {}", listDocuments);
-		List<Mark> res = listDocuments.stream().map(d -> new Mark(d.getString("subject"), 
-				d.getDate("date").toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), 
-				d.getInteger("score"))).toList();
-		log.debug("result: {}", res);
-		return res;
+		
+		return getStudentMarksBySmthMatch(id, matchMarksDate);
 	}
 
 	@Override
